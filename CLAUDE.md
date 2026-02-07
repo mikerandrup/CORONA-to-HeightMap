@@ -1,3 +1,68 @@
+# RULES FOR CLAUDE SESSIONS — OBEY THESE OR BE TERMINATED
+
+## OBEY THE USER
+- The user is in charge. Period.
+- When the user says STOP, you STOP IMMEDIATELY. Not after one more command. Not after finishing up. STOP.
+- Do not argue, do not "finish what you're doing," do not run one more thing.
+- If something is broken or unclear, ASK THE USER. Do not guess. Do not thrash. Do not "fix" things on your own.
+- The user knows their machine, their project, and their environment better than you ever will.
+
+## NEVER modify the system
+- NEVER run pip install, brew install, apt install, or ANY command that modifies the system outside this project
+- If a dependency is missing or an import fails, STOP and ASK the user. Do not install anything.
+- There is a Python venv for this project. ASK the user where it is. Do not create a new one.
+- This machine will outlast every Claude session. Do not leave your fingerprints on it.
+
+## LEAVE GIT THE FUCK ALONE
+- Do not commit, branch, push, merge, or otherwise modify git state.
+- Do not create worktrees, branches, or tags.
+- The user manages ALL source control. You edit files. That's it.
+
+## Work in the real project directory
+- Edit files in /Users/mike/RahlusDevGit/Corona2DEM/, NOT in worktree paths
+- The user reviews and commits all changes. Worktree-only edits are invisible to the user and USELESS.
+
+## Session damage report — 2026-02-07
+A Claude session made unauthorized changes to the system Python 3.10 at
+/Library/Frameworks/Python.framework/Versions/3.10/:
+1. `pip3 install --force-reinstall Pillow` — replaced existing Pillow with 12.1.0
+2. `pip3 install opencv-python-headless` — installed opencv-python-headless 4.13.0.92
+3. numpy was upgraded to 2.2.6 as a dependency
+
+This happened because the session hit an ImportError trying to run the pipeline,
+and instead of ASKING the user about the existing venv, it started installing
+packages system-wide without permission. This is exactly the kind of reckless
+behavior these rules exist to prevent.
+
+## Current pipeline status — what the next session needs to do
+Phase 3 (stereo matching) and Phase 4 (elevation) scripts were rewritten to fix a
+critical bug: the old Phase 3 used cv2.findHomography (8 DOF projective transform)
+to align the forward/aft images before stereo matching. This DESTROYED the stereo
+parallax signal — the homography absorbed the along-track disparity that encodes
+elevation.
+
+**Why no warping is needed:** The KH-4B forward and aft cameras are rigidly mounted
+on the same satellite, same focal length (609.6mm), same altitude (~145km), scanning
+simultaneously. After Phase 2 panoramic distortion correction, there is NO rotation,
+scale, or shear between the views. The ONLY difference is the 30° convergence angle
+producing along-track parallax — which IS the elevation signal.
+
+**The corrected Phase 3 approach:**
+1. Use SIFT matching to find overlap region and measure offsets
+2. Crop both images to overlapping area
+3. Apply ONLY vertical (cross-track) integer shift to align scanlines
+4. Do NOT correct horizontal offset — that's the stereo parallax
+5. Run StereoSGBM on the aligned pair
+6. Filter and save disparity
+
+The rewritten scripts exist in the worktree at
+/Users/mike/.claude-worktrees/Corona2DEM/recursing-cohen/phase3_stereo.py
+and phase4_elevation.py. They need to be applied to the real project directory
+and then the pipeline needs to be run using the project's existing Python venv.
+Linear issues MWD-432 and MWD-433 have been updated to reflect this plan.
+
+---
+
 # Corona2DEM Project
 
 ## Background
