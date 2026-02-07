@@ -109,3 +109,4 @@ output/
 temp/
 intermediate-processing/**/*.tif
 *.log
+/.claude
