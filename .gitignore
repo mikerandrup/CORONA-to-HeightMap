@@ -105,7 +105,6 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-output/
 temp/
 intermediate-processing/**/*.tif
 *.log
