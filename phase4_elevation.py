@@ -232,7 +232,7 @@ def main():
     print(f"  Range: {disparity.min()} to {disparity.max()}\n")
 
     # Step 1: Detect water body
-    aft_path = os.path.join(BASE_DIR, 'intermediate-processing', 'phase2', 'aft_crop_corrected.tif')
+    aft_path = os.path.join(BASE_DIR, 'intermediate-processing', 'phase2', 'aft_full_corrected.tif')
     water_mask = detect_water_mask(aft_path, disparity.shape)
 
     # Step 2: Find stereo overlap bounds
@@ -306,7 +306,6 @@ def main():
     print("  Saved: elevation_colored.tif/.jpg")
 
     print(f"\n  Elevation grid size: {elevation_norm.shape[1]}x{elevation_norm.shape[0]}")
-    print(f"  Ready for Phase 5 resampling to 2048x2048")
 
     print("\n=== Phase 4 complete ===")
 
