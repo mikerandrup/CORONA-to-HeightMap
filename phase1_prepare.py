@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
-Phase 1: Image Preparation (True Full Resolution)
+Phase 1: Image Preparation (Near Full Resolution)
 Load the full CORONA KH-4B stereo sub-images at original resolution.
-No cropping. No downsampling. Just trim film scan borders and rotate forward image.
+Trim film scan borders, rotate forward image, and cap width at 32767 (OpenCV SHRT_MAX).
+
+The width cap is necessary because multiple OpenCV functions (remap, warpPerspective,
+StereoSGBM) assert that image dimensions are < SHRT_MAX (32767). The crop is symmetric,
+removing equal amounts from each edge to preserve the image center.
 
 The Aft _b and Forward _c sub-images both contain the Abu Simbel / Lake Nasser area.
 The Forward image must be rotated 180° (cameras look in opposite directions).
 
 Input:  Raw CORONA sub-image TIFs (~33-36k x ~11k pixels)
-Output: Border-trimmed, rotation-corrected full sub-images
+Output: Border-trimmed, width-capped, rotation-corrected sub-images
 """
 
 from PIL import Image
@@ -25,6 +29,20 @@ OUTPUT_DIR = os.path.join(BASE_DIR, 'intermediate-processing', 'phase1')
 
 AFT_PATH = os.path.join(IMG_DIR, 'DS1105-2235DA087_87_b.tif')
 FWD_PATH = os.path.join(IMG_DIR, 'DS1105-2235DF081_81_c.tif')
+
+MAX_WIDTH = 32767  # OpenCV SHRT_MAX — hard limit for remap, warpPerspective, SGBM
+
+
+def cap_width(arr):
+    """Crop symmetrically to MAX_WIDTH if image exceeds OpenCV's SHRT_MAX limit."""
+    h, w = arr.shape
+    if w <= MAX_WIDTH:
+        return arr, 0
+    excess = w - MAX_WIDTH
+    left_crop = excess // 2
+    arr = arr[:, left_crop:left_crop + MAX_WIDTH]
+    print(f"  Width capped: {w} -> {MAX_WIDTH} (removed {left_crop}px from each edge)")
+    return arr, left_crop
 
 
 def trim_borders(arr, threshold=20):
@@ -58,6 +76,7 @@ def main():
     img.close()
     aft, aft_top, aft_bot = trim_borders(aft)
     print(f"  After trim: {aft.shape} (removed top {aft_top} rows, bottom from {aft_bot})")
+    aft, _ = cap_width(aft)
 
     save_with_thumbnail(aft,
                         os.path.join(OUTPUT_DIR, 'aft_full.tif'),
@@ -74,6 +93,7 @@ def main():
     img.close()
     fwd, fwd_top, fwd_bot = trim_borders(fwd)
     print(f"  After trim: {fwd.shape}")
+    fwd, _ = cap_width(fwd)
     fwd = np.rot90(fwd, 2)
     print(f"  Rotated 180°: {fwd.shape}")
 
