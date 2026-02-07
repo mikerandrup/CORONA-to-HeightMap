@@ -82,7 +82,7 @@ Extracting Digital Elevation Models (DEMs) from declassified CORONA KH-4B satell
 - API Base URL: https://m2m.cr.usgs.gov/api/api/json/stable/
 - Auth endpoint: login-token (POST username + token)
 - CORONA dataset name: corona2
-- Application Token (expires 03/31/2026): DAmMKc40hjhCGLZdlcpIZMPNMrC5kQIRW!XH1GwbBz3FA0MtWCIXGzVGOW!p9SP7
+- Application Token: [REVOKED — generate new token at https://ers.cr.usgs.gov/]
 - ERS Username: mikerandrup
 
 ## M2M API Usage Notes
