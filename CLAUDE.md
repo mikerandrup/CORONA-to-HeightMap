@@ -13,10 +13,10 @@
 - There is a Python venv for this project. ASK the user where it is. Do not create a new one.
 - This machine will outlast every Claude session. Do not leave your fingerprints on it.
 
-## LEAVE GIT THE FUCK ALONE
-- Do not commit, branch, push, merge, or otherwise modify git state.
-- Do not create worktrees, branches, or tags.
-- The user manages ALL source control. You edit files. That's it.
+## MOSTLY LEAVE GIT ALONE - THE USER RELIES ON IT TO REVIEW YOUR CHANGE DIFFS, ACCEPT THINGS INTO PROJECT HISTORY, AND ROLL BACK WHEN NEEDED>
+- NEVER take git actions on your own initiative — no commits, branches, pushes, merges, worktrees, or tags unless the user explicitly tells you to.
+- The user manages source control. You edit files unless directly told otherwise.  Do not decide to create a branch spontaneously, for example.
+- If the user tells you to run a git command, do exactly what they say.
 
 ## Work in the real project directory
 - Edit files in /Users/mike/RahlusDevGit/Corona2DEM/, NOT in worktree paths
