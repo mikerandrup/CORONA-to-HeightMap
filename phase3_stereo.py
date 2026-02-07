@@ -231,12 +231,19 @@ def main():
 
     print("=== Phase 3: Stereo Matching (Full Resolution) ===\n")
 
-    # Load Phase 2 outputs
+    # Load Phase 2 outputs and downsample to half resolution for memory
     print("Loading corrected images:")
-    aft = np.array(Image.open(os.path.join(INPUT_DIR, 'aft_full_corrected.tif')))
-    fwd = np.array(Image.open(os.path.join(INPUT_DIR, 'fwd_full_corrected.tif')))
-    print(f"  Aft: {aft.shape}")
-    print(f"  Fwd: {fwd.shape}\n")
+    aft_full = np.array(Image.open(os.path.join(INPUT_DIR, 'aft_full_corrected.tif')))
+    fwd_full = np.array(Image.open(os.path.join(INPUT_DIR, 'fwd_full_corrected.tif')))
+    print(f"  Aft full: {aft_full.shape}")
+    print(f"  Fwd full: {fwd_full.shape}")
+
+    # Downsample to half resolution — full res OOMs during SIFT/SGBM on 36GB
+    aft = cv2.resize(aft_full, (aft_full.shape[1] // 2, aft_full.shape[0] // 2), interpolation=cv2.INTER_AREA)
+    fwd = cv2.resize(fwd_full, (fwd_full.shape[1] // 2, fwd_full.shape[0] // 2), interpolation=cv2.INTER_AREA)
+    del aft_full, fwd_full
+    print(f"  Aft half: {aft.shape}")
+    print(f"  Fwd half: {fwd.shape}\n")
 
     # Step 1: Align stereo pair
     fwd_warped = align_stereo_pair(aft, fwd)
